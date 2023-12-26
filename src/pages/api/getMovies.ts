@@ -19,7 +19,7 @@ export interface IMovie {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<IMovie[]>
+  res: NextApiResponse<IMovie[] | { apiError: string }>
 ) {
   const url =
     "https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1&region=ko-KR";
@@ -27,12 +27,20 @@ export default async function handler(
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization: `Bearer ${process.env.API_KEY}1`,
+      Authorization: `Bearer ${process.env.API_KEY}`,
     },
   };
-  const { results }: { results: IMovie[] } = await (
-    await fetch(url, options)
-  ).json();
 
-  res.status(200).json(results);
+  try {
+    const { results }: { results: IMovie[] } = await (
+      await fetch(url, options)
+    ).json();
+
+    res.status(200).json(results);
+  } catch (error) {
+    const apiError = `❌ Error fetching movies from API Route. ${error}`;
+    console.error(apiError);
+
+    res.status(500).json({ apiError });
+  }
 }

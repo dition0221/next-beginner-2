@@ -82,9 +82,10 @@
     - App 전체에 전역 CSS를 사용 시 'global' 프로퍼티를 추가
       - 해당 컴포넌트를 포함한 하위 컴포넌트의 스타일링
   - App 컴포넌트
-    - 모든 페이지(컴포넌트)의 최상위 컴포넌트 ~청사진~
+    - 모든 페이지(컴포넌트)의 최상위 컴포넌트(청사진)
       - 페이지 컴포넌트들이 렌더링되기 전에 먼저 실행되는 파일
       - app의 전역 layout 및 설정을 관리하는 파일
+        - layout은 따로 컴포넌트를 사용하는 것을 권장
       - 기본적으로 NextJS에 내장되어 있음
     - 파일명 : `/pages/_app.tsx`
     - 기본형
@@ -98,7 +99,7 @@
       - pageProps : 현재 페이지로 전달되는 속성들
         - 페이지 컴포넌트에서 getInitialProps 함수를 통해 서버에서 가져오거나 초기화할 수 있는 속성들을 포함함
         - pageProps에는 서버 렌더링 시에 생성된 초기 데이터가 포함됨
-    - 다른 컴포넌트에서는 .css파일을 import 할 수 없는데, \_app.tsx에서는 가능함
+    - 다른 컴포넌트에서는 .css파일을 import 할 수 없는데, '\_app.tsx'에서는 가능함
     - ex.
       ```
       export default function App({ Component, pageProps }: AppProps) {
@@ -116,3 +117,130 @@
       }
       ```
 - **23-12-22 : #2.0 ~ #2.2 / Fetch data**
+  - Layout
+    - '\_app.tsx'파일에는 많은 내용을 넣지않기 때문에, layout 파일을 따로 생성해 사용
+    - ex.
+      ```
+      // Layout.tsx
+        interface ILayoutProps {
+          children: React.ReactNode;
+        }
+        export default function Layout({ children }: ILayoutProps) {
+          return (
+            <>
+              <Nav />
+              {children}
+            </>
+          );
+        }
+      // _app.tsx
+        export default function App({ Components, pageProps }: AppProps) {
+          return (
+            <Layout>
+              <Components {...pageProps} />
+            </Layout>
+          );
+        }
+      ```
+  - &lt;head&gt;
+    - 내장 기능으로 &lt;head&gt;태그를 수정할 수 있음
+      - 'react-helmet' 등의 패키지를 사용할 필요 x
+    - 기본형 : `<Head> ... </Head>`
+      - import Head from "next/head";
+    - ex.
+      ```
+      interface ISeoProps {
+        title: string;
+      }
+      export default function Seo({ title }: ISeoProps) {
+        return (
+          <Head>
+            <title>{`${title} | Next Movies`}</title>
+          </Head>
+        );
+      }
+      ```
+  - Redirect & Rewrites
+    - 'next.config.js'파일에서 설정 가능
+    - Redirect
+      - 특정 URL로의 요청을 다른 URL로 자동으로 전환하는 기능
+        - 사용자가 URL이 바뀌는 것을 알 수 있음
+      - 기본형
+        ```
+        async redirect() {
+          return [
+            {
+              source: "출발경로URL",
+              destination: "도착경로URL",
+              permanent?: 불리언값,
+            },
+            ......
+          ];
+        }
+        ```
+        - permanent(영구적) 값에 따라서, 브라우저나 검색엔진이 해당 정보를 기억하는지의 여부가 결정됨
+        - destination에 외보 URL 경로를 입력이 가능함
+        - path matching 기능
+      - ex.
+        ```
+        {
+          source: "old/:path*",
+          destination: "new/:path*",
+        }
+        ```
+    - Rewrites
+      - 서버에서의 실제 경로를 변경하지 않고, 클라이언트로 보내는 URL을 변경하는 기능
+        - URL이 바뀌지 않아, 사용자가 바뀐지 모름
+      - 기본형
+        ```
+        async rewrites() {
+          return [
+            {
+              source: "출발경로URL",
+              destination: "도착경로URL",
+            },
+            ......
+          ];
+        }
+        ```
+  - API Routes
+    - NextJS에서 서버 측 코드를 구현하여, 간단하게 API 엔드포인트를 생성하는 방법
+      - 서버 측에서 동작하므로 클라이언트에서 API 키가 노출되지 않음
+        - 서버 측 코드에서만 사용되기 때문
+        - 클라이언트 측에서는 해당 API Routes에 대한 요청을 보내고, 서버에서는 해당 요청을 처리하고 응답을 생성
+        - 클라이언트는 단순히 서버로 요청을 보내고 응답을 받았을 뿐
+    - 파일명 : `/pages/api/파일경로.ts`
+    - 기본형
+      ```
+      import type { NextApiRequest, NextApiResponse } from "next";
+      export default function handler(
+        req: NextApiRequest,
+        res: NextApiResponse<JSON데이터타입>
+      ) {
+        res.status(200).json(JSON데이터);
+      }
+      ```
+    - '.env.local' 파일을 사용해 API 키를 저장
+      - 불러올 떄에는 `process.env.변수명`으로 불러옴
+      - 서버 측에서만 사용 시 'NEXT_PUBLIC' 접두사가 필요 없음
+    - 동적 route 가능
+    - ex.
+      ```
+      export default async function handler(
+        req: NextApiRequest,
+        res: NextApiResponse<IMovie[]>
+      ) {
+        const url =
+          "https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1&region=ko-KR";
+        const options = {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${process.env.API_KEY}`,
+          },
+        };
+        const { results }: { results: IMovie[] } = await (await fetch(url, options)).json();
+        res.status(200).json(results);
+      }
+      ```
+- **23-12-26 : #2.3 ~ #2.8 / SSR + dynamic URL**

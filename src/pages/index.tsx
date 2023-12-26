@@ -1,33 +1,46 @@
+import Link from "next/link";
+// APIs
+import { IMovie } from "@/pages/api/getMovies";
+// components
 import Seo from "@/components/Seo";
-import { useEffect, useState } from "react";
-import { IMovie } from "./api/getMovies";
 
-export default function Home() {
-  const [movies, setMovies] = useState([] as IMovie[]);
-  useEffect(() => {
-    (async () => {
-      const res: IMovie[] = await (await fetch("/api/getMovies")).json();
-      setMovies(res);
-    })();
-  }, []);
+interface IHomeProps {
+  movies: IMovie[] | { apiError: string };
+  ssrError?: string;
+}
 
+export default function Home({ movies, ssrError }: IHomeProps) {
   return (
     <main>
       <Seo title="Home" />
-      {movies.length === 0 && <h4>Loading...</h4>}
-      {movies?.map((movie) => (
-        <div className="movie" key={movie.id}>
-          <img src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} />
-          <h4>{movie.title}</h4>
-        </div>
-      ))}
+
+      {ssrError ? <span>{ssrError}</span> : null}
+      {!Array.isArray(movies) ? <span>{movies?.apiError}</span> : null}
+
+      {Array.isArray(movies) &&
+        movies?.map((movie) => (
+          <Link href={`/movies/${movie.title}/${movie.id}`} key={movie.id}>
+            <div className="movie">
+              <img
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              />
+              <h4>{movie.title}</h4>
+            </div>
+          </Link>
+        ))}
 
       <style jsx>{`
         main {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          padding: 20px;
           gap: 20px;
+        }
+        .movie {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          cursor: pointer;
         }
         .movie img {
           max-width: 100%;
@@ -39,10 +52,24 @@ export default function Home() {
           transform: scale(1.05) translateY(-10px);
         }
         .movie h4 {
-          font-size: 18px;
+          font-size: min(16px, 3.5vw);
           text-align: center;
         }
       `}</style>
     </main>
   );
+}
+
+export async function getServerSideProps() {
+  // fetch API: '/api/getMovies'
+  try {
+    const movies: IMovie[] = await (
+      await fetch("http://localhost:3000/api/getMovies")
+    ).json();
+    return { props: { movies } };
+  } catch (error) {
+    const ssrError = `❌ Error fetching movies from SSR. ${error}`;
+    console.error(ssrError);
+    return { props: { ssrError } };
+  }
 }
