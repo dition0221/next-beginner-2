@@ -10,13 +10,29 @@ interface IDetailProps {
 }
 
 export default function Detail({ movie, ssrError }: IDetailProps) {
+  // fetch API: Error
   if (ssrError) console.error("❌", ssrError);
 
   return (
     <>
       <Seo title={movie?.title || "Error"} />
+
       <main>
-        <h4>{movie?.title || "Error"}</h4>
+        <img
+          src={`https://image.tmdb.org/t/p/w500${movie?.backdrop_path}`}
+          alt="backdrop_image"
+        />
+        <h4>
+          {`${movie?.title} (${movie?.release_date.slice(0, 4)})` || "Error"}
+        </h4>
+        <span>{movie?.tagline}</span>
+        <span>{`runtime : ${movie?.runtime} minutes`}</span>
+        <p>{movie?.overview}</p>
+        <ul>
+          {movie?.genres.map((genre) => (
+            <li key={genre.id}>{genre.name}</li>
+          ))}
+        </ul>
 
         {/* Error */}
         <span>
@@ -25,6 +41,15 @@ export default function Detail({ movie, ssrError }: IDetailProps) {
         <span>{ssrError /* SSR */}</span>
         <span>{movie?.apiError /* API Route*/}</span>
       </main>
+
+      <style jsx>{`
+        img {
+          width: 100%;
+        }
+        span {
+          display: block;
+        }
+      `}</style>
     </>
   );
 }

@@ -244,3 +244,132 @@
       }
       ```
 - **23-12-26 : #2.3 ~ #2.8 / SSR + dynamic URL**
+  - SSR (Server Side Render)
+    - 서버에서 페이지를 완전히 rendering하여, 클라이언트에 전송하는 방식
+      - JavaScript를 사용하지 않더라도 데이터를 rendering하여 보여줌
+      - 사전 생성된 HTML페이지에 데이터가 포함됨
+        - \_\_NEXT_DATA\_\_'란 &lt;script&gt;에 데이터가 담김
+    - 장점
+      1. 초기 로딩 속도가 빠름
+      2. SEO(검색 엔진 최적화)에 유리함
+    - 기본형
+      ```
+      export function getServerSideProps() {
+        return { props: { 보낼 데이터 } };
+      }
+      ```
+      - 컴포넌트의 내용은 서버 측에서만 작동함
+        - 서버 측에서 동작하여, API 키를 숨길 수 있음
+      - 컴포넌트명은 절대 바꾸지 말 것
+        - 페이지.tsx 파일 내에서 작성
+      - object를 return 해야 함
+        - 'props' 키명에 원하는 데이터를 object 형태로 전송함
+        - 실제 컴포넌트에서 props로 받음
+        - '\_app.tsx'가 알아서 pageProps로 사용함
+    - ex.
+      ```
+      export default function Home({ movies }: { movies: IMovie[] }) { ... }
+      export async function getServerSideProps() {
+        const movies: IMovie[] = await (await fetch("http://localhost:3000/api/getMovies")).json();
+        return { props: { movies } };
+      }
+      ```
+    - 서버 측에서 동작하므로, 상대경로 사용 불가능
+      - 상대경로는 클라이언트 측에서만 사용 가능
+  - Dynamic URL
+    - 사용자가 접속하는 동적인 콘텐츠를 가진 웹 페이지의 주소
+      - 'react-router-dom'에서는 '/:id'와 같은 방식으로 동작함
+    - 파일명 : `[파리미터명].tsx`
+    - 'useRouter()'의 '.query'로부터 파라미터 값을 가져올 수 있음
+      - 파일명과 같은 파라미터명을 가짐
+    - ex.
+      ```
+      // pages/movies/[id].tsx
+        export default function Detail() {
+          const router = useRouter();
+          console.log(router.query);
+          return <div>Detail</div>;
+        }
+      // '/movies/123132'에 접속 시 '{ id: 123123 }' 콘솔이 나타남
+      ```
+  - 라우터를 사용해 (query)데이터를 보내는 방법
+    - fetch API 보다 속도가 빠름
+    1. useRouter().push()
+       - 기본형
+         ```
+         const 라우터명 = useRouter();
+         라우터명.push(
+          {
+            pathname: 이동할URL,
+            query: { 보낼데이터 },
+          },
+          ?보여질URL(마스킹),
+         );
+         ```
+       - query : URL에 '?'뒤에 오는 쿼리 문자열
+         - '라우터명.query'를 통해 데이터를 가져올 수 있음
+       - 보여질URL(마스킹) : [옵션] URL에 쿼리 문자열을 가릴 수 있음
+       - ex.
+         ```
+         const router = useRouter();
+         router.push(
+          {
+            pathname: `/movies/${id}`,
+            query: {
+              title: "MOVIE",
+            },
+          },
+          `/movies/${id}`
+         );
+         ```
+    2. &lt;Link&gt;
+       - 기본형
+         ```
+         <Link href={{
+           pathname: 이동할URL,
+           query: { 보낼데이터 },
+         }}
+         ?as="보여질URL(마스킹)"> ... </Link>
+         ```
+       - ex.
+         ```
+         <Link
+           href={{
+             pathname: `/movies/${movie.id}`,
+             query: {
+               title: movie.title,
+             },
+           }}
+           as={`/movies/${movie.id}`}
+         > ... </Link>
+         ```
+  - Catch-All URL
+    - dynamic URL이 여러 개 있어도 전부 잡아낼 수 있는 URL
+    - 파일명 : `[...파라미터명].tsx`
+    - '라우터명.query'를 통해 파라미터 값을 가져올 수 있으며, 배열로 이루어져 있음
+      - ex. `'/movies/12/34/56'으로 접속 시 'pages/movies/[...id].tsx'파일에서 '라우터명.query = { id: [12, 34, 56] }' 값을 가짐`
+    - URL로 직접 이동 시 '라우터명.query'에서 Error가 발생함
+      - 서버에서 아직 존재하지 않는 배열이기 때문
+      - 해결법 : '또는 빈배열' (|| []) 코드를 추가함
+      - ex.
+        ```
+        // [...params].tsx
+        const [title, movieId] = (router.query.params as string[]) || [];
+        ```
+    - SEO에 최적화시키기 위해 SSR 방법을 사용할 수 있음
+      - 'getServerSideProps'의 첫 번째 매개변수(context)를 통해 server-side context 정보를 가져올 수 있음
+      - 기본형 : `export function getServerSideProps(ctx: GetServerSidePropsContext) { ... }`
+      - ex.
+        ```
+        export function getServerSideProps({
+          query: { params },
+        }: GetServerSidePropsContext) {
+          return {
+            props: { params },
+          };
+        }
+        ```
+  - 404 페이지
+    - 404 페이지를 직접 커스텀마이징을 할 수 있음
+    - 파일명 : `/pages/404.tsx`
+- **23-12-28 : CSS(1)**
