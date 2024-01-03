@@ -5,24 +5,27 @@ export default function Nav() {
   const router = useRouter();
 
   return (
-    <nav>
-      <img src="/vercel.svg" />
-      <div>
-        <Link href="/" className={router.pathname === "/" ? "active" : ""}>
-          Home
-        </Link>
-        <Link
-          href="/about"
-          className={router.pathname === "/about" ? "active" : ""}
-        >
-          About
-        </Link>
-      </div>
+    <>
+      <nav>
+        <img src="/vercel.svg" />
+        <div>
+          <Link href="/" className={router.pathname === "/" ? "active" : ""}>
+            Home
+          </Link>
+          <Link
+            href="/about"
+            className={router.pathname === "/about" ? "active" : ""}
+          >
+            About
+          </Link>
+        </div>
+      </nav>
 
       <style jsx>{`
         nav {
           position: sticky;
           top: 0;
+          z-index: 99;
           background-color: whitesmoke;
           display: flex;
           gap: 10px;
@@ -52,6 +55,6 @@ export default function Nav() {
           gap: 10px;
         }
       `}</style>
-    </nav>
+    </>
   );
 }

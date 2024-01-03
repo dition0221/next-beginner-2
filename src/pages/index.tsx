@@ -14,9 +14,11 @@ export default function Home({ movies, ssrError }: IHomeProps) {
     <main>
       <Seo title="Home" />
 
-      {ssrError ? <span>{ssrError}</span> : null}
-      {!Array.isArray(movies) ? <span>{movies?.apiError}</span> : null}
+      {/* Error */}
+      {ssrError && <span>{ssrError}</span>}
+      {!Array.isArray(movies) && <span>{movies?.apiError}</span>}
 
+      {/* Movie list */}
       {Array.isArray(movies) &&
         movies?.map((movie) => (
           <Link href={`/movies/${movie.title}/${movie.id}`} key={movie.id}>

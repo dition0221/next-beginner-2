@@ -13,6 +13,7 @@ body {
   width: 100%;
   margin: 0 auto;
   background-color: whitesmoke;
+  -webkit-tap-highlight-color: transparent; /* 클릭 시 파란박스 제거 */
 }
 a {
   color: inherit;

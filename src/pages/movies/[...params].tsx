@@ -16,14 +16,17 @@ export default function Detail({ movie, ssrError }: IDetailProps) {
   return (
     <>
       <Seo title={movie?.title || "Error"} />
-      <article />
 
       <main>
+        <img
+          src={`https://image.tmdb.org/t/p/w500${movie?.backdrop_path}`}
+          alt="포스터"
+        />
         <h4>
           {`${movie?.title} (${movie?.release_date?.slice(0, 4)})` || "Error"}
         </h4>
-        <span>{movie?.tagline}</span>
-        <span>{`runtime : ${movie?.runtime} minutes`}</span>
+        {movie?.runtime && <span>{`🕘 ${movie?.runtime} min`}</span>}
+        <p className="tagline">{movie?.tagline}</p>
         <p>{movie?.overview}</p>
         <ul>
           {movie?.genres?.map((genre) => (
@@ -32,27 +35,26 @@ export default function Detail({ movie, ssrError }: IDetailProps) {
         </ul>
 
         {/* Error */}
-        <span>
-          {movie?.success === false && `Fail: ${movie?.status_message}`}
-        </span>
-        <span>{ssrError /* SSR */}</span>
-        <span>{movie?.apiError /* API Route*/}</span>
+        {movie?.success === false && (
+          <span>{`Fail: ${movie?.status_message}`}</span>
+        )}
+        {ssrError && <span>{ssrError}</span>}
+        {movie?.apiError && <span>{movie?.apiError}</span>}
       </main>
 
       <style jsx>{`
-        article {
-          /* background-image: url(); */
-          position: fixed;
-          left: 0;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          max-width: 100%;
-          height: 100vh;
-          z-index: -1;
+        img {
+          width: 100%;
         }
         span {
           display: block;
+        }
+        p {
+          font-size: min(16px, 4vw);
+        }
+        .tagline {
+          margin-top: 40px;
+          font-style: italic;
         }
       `}</style>
     </>
