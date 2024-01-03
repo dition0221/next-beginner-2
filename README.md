@@ -374,4 +374,6 @@
     - 파일명 : `/pages/404.tsx`
 - **23-12-28 : CSS(1)**
 - **24-01-03 : CSS(2)**
-  - Issue : gh-pages로 배포 시 실패 현상
+  - ~~Issue : gh-pages로 배포 시 실패 현상~~
+- **24-01-04 : Deploy**
+  - Fix : Vercel로 배포
