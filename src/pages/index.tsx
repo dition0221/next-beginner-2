@@ -66,7 +66,9 @@ export async function getServerSideProps() {
   // fetch API: '/api/getMovies'
   try {
     const movies: IMovie[] = await (
-      await fetch("http://localhost:3000/api/getMovies")
+      await fetch(
+        "https://next-beginner-2-git-main-dition0221s-projects.vercel.app/api/getMovies"
+      )
     ).json();
     return { props: { movies } };
   } catch (error) {
