@@ -1,6 +1,6 @@
 # Next - Beginner (2)
 
-### Next.js 입문기 (2번째)
+### NextJS를 이용한 간단한 영화 웹 사이트 입니다. Simple movie web site using NextJS.
 
 - Next.js : 14버전
 
@@ -377,3 +377,8 @@
   - ~~Issue : gh-pages로 배포 시 실패 현상~~
 - **24-01-04 : Deploy**
   - Fix : Vercel로 배포
+- **24-01-05 : CSS(3)**
+  - Fix
+    - 배경색 수정
+    - [Nav] &lt;Link&gt; CSS 수정
+  - Update : [About] 문구 추가
