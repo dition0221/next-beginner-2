@@ -19,7 +19,7 @@ export default function About() {
         </small>
 
         <p>Vercel을 통한 배포 작업.</p>
-        <small>Deployment took place with Vessel.</small>
+        <small>Deployment took place with Vercel.</small>
       </main>
 
       <style jsx>{`
